@@ -1,0 +1,60 @@
+{% extends 'base.html' %}
+{% block title %}Add Member - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-user-plus"></i> Add New Member{% endblock %}
+{% block content %}
+<div class="form-card">
+    <form method="POST" class="lms-form" enctype="multipart/form-data">
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Full Name *</label>
+                <input type="text" name="name" placeholder="Enter full name" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address *</label>
+                <input type="email" name="email" placeholder="Enter email" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-lock"></i> Password *</label>
+                <input type="password" name="password" placeholder="Set a password" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Phone Number</label>
+                <input type="tel" name="phone" placeholder="e.g. 9876543210">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-graduation-cap"></i> Student Year / Division *</label>
+                <select name="year_division" required style="background: rgba(255,255,255,0.05); color: var(--text); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); width: 100%;">
+                    <option value="FY (First Year B.Sc. IT)" style="background: #1e293b;">FY - First Year (B.Sc. IT)</option>
+                    <option value="SY (Second Year B.Sc. IT)" style="background: #1e293b;">SY - Second Year (B.Sc. IT)</option>
+                    <option value="TY (Third Year B.Sc. IT)" style="background: #1e293b;">TY - Third Year (B.Sc. IT)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-chair"></i> Seat Number</label>
+                <input type="text" name="seat_number" placeholder="e.g. A-12">
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-camera"></i> Profile Photo</label>
+                <input type="file" name="profile_photo" accept="image/*">
+            </div>
+            <div class="form-group">
+                <!-- Spacing -->
+            </div>
+        </div>
+        <div class="form-group full-width">
+            <label><i class="fas fa-map-marker-alt"></i> Address</label>
+            <textarea name="address" rows="2" placeholder="Enter address..."></textarea>
+        </div>
+        <div class="form-buttons">
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Add Member</button>
+            <a href="{{ url_for('members') }}" class="btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,79 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="640" height="680" viewBox="0 0 640 680" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <style>
+      .motto { font-family: 'DejaVu Sans', 'Arial', sans-serif; font-weight: 800; font-size: 22px; fill: #0f172a; letter-spacing: 2px; }
+      .title { font-family: 'DejaVu Serif', 'Georgia', serif; font-weight: 800; font-size: 38px; fill: #0f172a; }
+      .subtitle { font-family: 'DejaVu Sans', 'Arial', sans-serif; font-weight: 800; font-size: 20px; fill: #a31010; letter-spacing: 0.5px; }
+    </style>
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000000" flood-opacity="0.15"/>
+    </filter>
+  </defs>
+
+  <!-- Solid Crisp White Card Background -->
+  <rect x="10" y="10" width="620" height="660" rx="36" ry="36" fill="#ffffff" stroke="#e8650a" stroke-width="6" filter="url(#shadow)"/>
+
+  <!-- Motto Top -->
+  <text x="320" y="65" text-anchor="middle" class="motto">|| PLAY THE GAME ||</text>
+
+  <!-- MAIN EMBLEM -->
+  <g transform="translate(120, 85)">
+    <!-- Left Maroon Shield -->
+    <rect x="35" y="55" width="165" height="340" rx="28" ry="28" fill="#a31010" />
+
+    <!-- Right Black Curved Section -->
+    <path d="M 195 55 
+             L 285 55 
+             C 325 55, 345 85, 345 125 
+             L 345 315 
+             C 345 365, 305 395, 245 395 
+             L 215 395 
+             C 285 390, 290 315, 290 235 
+             L 290 125 
+             C 290 85, 255 55, 195 55 Z" fill="#0f172a" />
+
+    <!-- White Separation Curve -->
+    <path d="M 190 55 
+             C 250 55, 280 85, 280 125 
+             L 280 235 
+             C 280 325, 275 395, 195 395 
+             C 170 395, 150 380, 135 355 
+             C 175 355, 205 325, 205 275 
+             L 205 135 
+             C 205 95, 185 65, 190 55 Z" fill="#ffffff" />
+
+    <!-- Sharp Maroon Re-align -->
+    <path d="M 35 83
+             C 35 67.5, 47.5 55, 63 55
+             L 190 55
+             C 170 85, 160 125, 160 175
+             L 160 275
+             C 160 330, 135 375, 80 395
+             L 63 395
+             C 47.5 395, 35 382.5, 35 367
+             Z" fill="#a31010" />
+
+    <!-- Top Right Orange Circle with Pen Nib -->
+    <g transform="translate(260, 50)">
+      <circle cx="0" cy="0" r="54" fill="#ffffff" />
+      <circle cx="0" cy="0" r="46" fill="#f59e0b" />
+      <path d="M 0 -30 L 16 12 C 16 18, 10 24, 0 24 C -10 24, -16 18, -16 12 Z" fill="#ffffff" />
+      <line x1="0" y1="-22" x2="0" y2="6" stroke="#f59e0b" stroke-width="3.5" stroke-linecap="round" />
+      <circle cx="0" cy="6" r="4" fill="#f59e0b" />
+    </g>
+
+    <!-- Bottom-Left Computer Monitor Icon -->
+    <g transform="translate(115, 280)">
+      <circle cx="0" cy="0" r="50" fill="#ffffff" />
+      <circle cx="0" cy="0" r="46" fill="none" stroke="#a31010" stroke-width="4.5" />
+      <rect x="-26" y="-22" width="52" height="34" rx="5" ry="5" fill="none" stroke="#a31010" stroke-width="4.5" />
+      <path d="M -6 12 L 6 12 L 6 18 L 12 18 L 12 23 L -12 23 L -12 18 L -6 18 Z" fill="#a31010" />
+      <path d="M -16 -4 L -5 7 L 16 -12" fill="none" stroke="#f59e0b" stroke-width="5" stroke-linecap="round" stroke-linejoin="round" />
+    </g>
+  </g>
+
+  <!-- BOTTOM TYPOGRAPHY -->
+  <text x="320" y="555" text-anchor="middle" class="title">Junnar Education Society</text>
+  <text x="320" y="595" text-anchor="middle" class="subtitle">S.B.P. Senior College (B.Sc. IT Department)</text>
+</svg>

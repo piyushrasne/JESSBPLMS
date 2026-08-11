@@ -1,0 +1,50 @@
+{% extends 'base.html' %}
+{% block title %}Audit Logs - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-clipboard-list"></i> System Audit Logs{% endblock %}
+
+{% block content %}
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="data-table" id="auditTable">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Timestamp</th>
+                    <th>User</th>
+                    <th>Action</th>
+                    <th>Target</th>
+                    <th>Details</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for log in logs %}
+                <tr>
+                    <td>{{ log.id }}</td>
+                    <td>{{ log.timestamp }}</td>
+                    <td>{{ log.user_name or 'System' }}</td>
+                    <td><span class="badge" style="background:#3b82f6; color:#fff;">{{ log.action }}</span></td>
+                    <td>{{ log.target }}</td>
+                    <td>{{ log.details }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="empty-row">No logs found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#auditTable').DataTable({
+        "pageLength": 25,
+        "order": [[ 0, "desc" ]]
+    });
+});
+</script>
+{% endblock %}

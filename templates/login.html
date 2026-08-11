@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+{% block title %}Login - Library Management System{% endblock %}
+{% block auth_content %}
+<div class="login-page">
+    <div class="login-bg">
+        <div class="floating-book" style="--i:1"><i class="fas fa-book-open"></i></div>
+        <div class="floating-book" style="--i:2"><i class="fas fa-book"></i></div>
+        <div class="floating-book" style="--i:3"><i class="fas fa-graduation-cap"></i></div>
+        <div class="floating-book" style="--i:4"><i class="fas fa-bookmark"></i></div>
+        <div class="floating-book" style="--i:5"><i class="fas fa-scroll"></i></div>
+    </div>
+
+    <div class="login-split">
+
+        <!-- LEFT PANEL: Info about the system -->
+        <div class="login-info-side">
+            <div class="login-info-inner">
+                <div class="login-brand" style="text-align: center; display: flex; flex-direction: column; align-items: center;">
+                    <div style="background: #ffffff; padding: 14px 22px; border-radius: 20px; box-shadow: 0 12px 32px rgba(0,0,0,0.35); margin-bottom: 20px; border: 2px solid #e8650a; display: inline-block;">
+                        <img src="{{ url_for('static', filename='images/jes_logo.png') }}" alt="Junnar Education Society Logo" style="height: 125px; width: auto; object-fit: contain; display: block;">
+                    </div>
+                </div>
+
+                <p class="login-tagline" style="margin-top: 10px; text-align: center; font-size: 0.95rem; color: #cbd5e1; line-height: 1.5;">
+                    A complete digital platform to manage library books, members, and transactions — fast, secure, and easy to use.
+                </p>
+
+                <div class="login-features">
+                    <div class="login-feature-item">
+                        <div class="lf-icon"><i class="fas fa-book"></i></div>
+                        <div>
+                            <strong>Book Management</strong>
+                            <span>Add, edit, search books by title, author, ISBN & category</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="lf-icon"><i class="fas fa-users"></i></div>
+                        <div>
+                            <strong>Member Records</strong>
+                            <span>Maintain and manage library member profiles securely</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="lf-icon"><i class="fas fa-exchange-alt"></i></div>
+                        <div>
+                            <strong>Issue & Return</strong>
+                            <span>Issue books with auto due dates and process returns</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="lf-icon"><i class="fas fa-rupee-sign"></i></div>
+                        <div>
+                            <strong>Fine Calculation</strong>
+                            <span>Automatic fine tracking for overdue books (₹5/day)</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="lf-icon"><i class="fas fa-chart-bar"></i></div>
+                        <div>
+                            <strong>Reports & Analytics</strong>
+                            <span>Monthly stats, popular books, overdue list and more</span>
+                        </div>
+                    </div>
+                    <div class="login-feature-item">
+                        <div class="lf-icon"><i class="fas fa-shield-alt"></i></div>
+                        <div>
+                            <strong>Secure Access</strong>
+                            <span>Role-based login for Admin and Library Members</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- RIGHT PANEL: Login form -->
+        <div class="login-form-side">
+            <div class="login-card">
+                <div class="login-logo" style="text-align: center; margin-bottom: 22px;">
+                    <h2 style="font-size: 1.6rem; font-weight: 800; color: #ffffff; margin: 0; font-family: 'Outfit', sans-serif;">Sign In</h2>
+                    <p style="color: #94a3b8; font-size: 0.88rem; margin-top: 4px; font-weight: 500;">Access B.Sc. IT Library System</p>
+                </div>
+
+                {% set messages = get_flashed_messages() %}
+                {% if messages and messages.length %}
+                {% for msg in messages %}
+                <div class="alert alert-{{ msg.category }}">
+                    <i class="fas fa-exclamation-circle"></i> {{ msg.message }}
+                </div>
+                {% endfor %}
+                {% endif %}
+
+                <form method="POST" action="/" class="login-form" id="loginForm">
+                    <div class="form-group">
+                        <label><i class="fas fa-envelope"></i> Email Address</label>
+                        <input type="email" name="email" id="emailInput" placeholder="Enter your email" required autocomplete="email">
+                    </div>
+                    <div class="form-group">
+                        <label><i class="fas fa-lock"></i> Password</label>
+                        <div class="password-wrap">
+                            <input type="password" name="password" id="passwordInput" placeholder="Enter your password" required>
+                            <button type="button" class="toggle-password" onclick="togglePassword()" title="Toggle password visibility">
+                                <i class="fas fa-eye" id="eyeIcon"></i>
+                            </button>
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn-login">
+                        <i class="fas fa-sign-in-alt"></i> Sign In
+                    </button>
+                </form>
+
+                <div style="margin-top: 24px; padding: 14px 16px; background: rgba(249, 115, 22, 0.08); border-radius: 12px; border: 1px dashed rgba(249, 115, 22, 0.35);">
+                    <div style="font-size: 0.85rem; font-weight: 700; margin-bottom: 10px; color: #fb923c; display: flex; align-items: center; gap: 6px;">
+                        <i class="fas fa-key"></i> Quick Demo Login:
+                    </div>
+                    <div style="display: flex; gap: 10px;">
+                        <button type="button" onclick="fillAdmin()" style="flex: 1; padding: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; color: #f1f5f9; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(249,115,22,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <i class="fas fa-user-shield" style="color: #f97316;"></i> Admin
+                        </button>
+                        <button type="button" onclick="fillMember()" style="flex: 1; padding: 10px; background: rgba(255, 255, 255, 0.08); border: 1px solid rgba(255, 255, 255, 0.15); border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer; color: #f1f5f9; display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s;" onmouseover="this.style.background='rgba(59,130,246,0.2)'" onmouseout="this.style.background='rgba(255,255,255,0.08)'">
+                            <i class="fas fa-user" style="color: #60a5fa;"></i> Member
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+</div>
+<script>
+function togglePassword() {
+    const inp = document.getElementById('passwordInput');
+    const icon = document.getElementById('eyeIcon');
+    if (inp.type === 'password') {
+        inp.type = 'text';
+        icon.className = 'fas fa-eye-slash';
+    } else {
+        inp.type = 'password';
+        icon.className = 'fas fa-eye';
+    }
+}
+function fillAdmin() {
+    document.getElementById('emailInput').value = 'admin@library.com';
+    document.getElementById('passwordInput').value = 'admin123';
+    document.getElementById('loginForm').submit();
+}
+function fillMember() {
+    document.getElementById('emailInput').value = 'member@library.com';
+    document.getElementById('passwordInput').value = 'member123';
+    document.getElementById('loginForm').submit();
+}
+</script>
+{% endblock %}

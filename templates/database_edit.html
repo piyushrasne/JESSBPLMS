@@ -1,0 +1,37 @@
+{% extends 'base.html' %}
+{% block title %}Edit Record - Database - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-edit"></i> Edit Record in Table: <span style="color: var(--primary);">{{ table_name }}</span>{% endblock %}
+
+{% block content %}
+<div class="form-card" style="max-width: 800px; margin: 0 auto;">
+    <div style="margin-bottom: 20px; border-bottom: 1px solid var(--card-border); padding-bottom: 12px; display: flex; justify-content: space-between; align-items: center;">
+        <h3 style="margin: 0; font-size: 1.1rem; color: var(--text);"><i class="fas fa-key"></i> Primary Key ({{ pk }}): {{ row[pk] }}</h3>
+        <span class="badge badge-warning">Direct DB Editor</span>
+    </div>
+
+    <form method="POST" class="lms-form">
+        <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px;">
+            {% for col in columns %}
+            <div class="form-group" style="{% if col in ['description', 'address', 'details'] %}grid-column: span 2;{% endif %}">
+                <label style="font-weight: 600; font-size: 0.85rem; color: var(--text-muted); display: flex; align-items: center; gap: 6px;">
+                    <i class="fas fa-database" style="color: var(--primary); font-size: 0.75rem;"></i> {{ col }}
+                    {% if col == pk %}<small style="color: var(--primary);">(Read Only)</small>{% endif %}
+                </label>
+                {% if col == pk %}
+                <input type="text" value="{{ row[col] }}" disabled style="opacity: 0.6; cursor: not-allowed; background: rgba(0,0,0,0.2);">
+                {% elif col in ['description', 'address', 'details'] %}
+                <textarea name="{{ col }}" rows="3" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 8px; color: var(--text); padding: 10px;">{{ row[col] or '' }}</textarea>
+                {% else %}
+                <input type="text" name="{{ col }}" value="{{ row[col] if row[col] is not none else '' }}" style="width: 100%; background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 8px; color: var(--text); padding: 10px;">
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+
+        <div class="form-buttons" style="margin-top: 24px;">
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Changes to DB</button>
+            <a href="{{ url_for('admin_database', table=table_name) }}" class="btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

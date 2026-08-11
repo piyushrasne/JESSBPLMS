@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>B.Sc. IT Department Library Card - {{ member.name }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Plus Jakarta Sans', sans-serif; text-align: center; padding: 40px 20px; background: #0f172a; color: #1e293b; }
+        .card-container { width: 420px; background: #ffffff; margin: 0 auto; border-radius: 16px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2px solid #e8650a; position: relative; text-align: left; }
+        .card-header { background: linear-gradient(135deg, #0f172a, #1e293b); color: #ffffff; padding: 20px; text-align: center; border-bottom: 4px solid #e8650a; position: relative; }
+        .college-logo-wrap { display: flex; align-items: center; justify-content: center; gap: 12px; margin-bottom: 8px; }
+        .college-logo { width: 45px; height: 45px; border-radius: 50%; border: 2px solid #e8650a; }
+        .college-title { font-size: 1.15rem; font-weight: 800; color: #ffffff; letter-spacing: 0.5px; }
+        .dept-subtitle { font-size: 0.8rem; font-weight: 700; color: #e8650a; text-transform: uppercase; letter-spacing: 1px; margin-top: 2px; }
+        .card-type-badge { background: #e8650a; color: #ffffff; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 700; display: inline-block; margin-top: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+        
+        .card-body { padding: 22px; display: flex; gap: 18px; align-items: flex-start; }
+        .photo-container { position: relative; }
+        .photo { width: 95px; height: 115px; border-radius: 10px; object-fit: cover; border: 3px solid #e2e8f0; background: #cbd5e1; display: flex; align-items: center; justify-content: center; font-size: 2.2rem; color: #0f172a; font-weight: 800; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        .active-dot { position: absolute; bottom: -5px; right: -5px; background: #22c55e; width: 16px; height: 16px; border-radius: 50%; border: 2px solid #ffffff; }
+
+        .info { flex: 1; }
+        .info h3 { margin: 0 0 6px 0; color: #0f172a; font-size: 1.2rem; font-weight: 800; }
+        .info-row { display: flex; margin-bottom: 6px; font-size: 0.82rem; }
+        .info-label { width: 75px; font-weight: 700; color: #64748b; flex-shrink: 0; }
+        .info-val { font-weight: 600; color: #1e293b; }
+        .year-tag { background: #e0f2fe; color: #0369a1; padding: 2px 8px; border-radius: 6px; font-weight: 700; font-size: 0.78rem; display: inline-block; }
+
+        .barcode-strip { background: #f8fafc; padding: 12px 20px; border-top: 1px dashed #cbd5e1; border-bottom: 1px dashed #cbd5e1; display: flex; justify-content: space-between; align-items: center; }
+        .barcode-lines { font-family: 'Courier New', monospace; letter-spacing: 4px; font-weight: bold; font-size: 1.1rem; color: #0f172a; }
+
+        .card-footer { background: #f1f5f9; padding: 12px 20px; display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #64748b; }
+        .signature-box { text-align: right; }
+        .sig-line { width: 90px; border-bottom: 1px solid #94a3b8; margin-bottom: 3px; display: inline-block; }
+
+        .print-btn-bar { margin-top: 30px; }
+        .btn-print { background: #e8650a; color: #ffffff; border: none; padding: 12px 28px; border-radius: 8px; font-weight: 700; font-size: 1rem; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(232,101,10,0.4); }
+        .btn-print:hover { background: #c4520a; }
+
+        @media print {
+            body { background: #ffffff; padding: 0; }
+            .card-container { box-shadow: none; border: 2px solid #000; }
+            .print-btn-bar { display: none; }
+        }
+    </style>
+</head>
+<body onload="window.print()">
+    <div class="card-container">
+        <div class="card-header">
+            <div class="college-logo-wrap">
+                <div style="background: #ffffff; padding: 3px; border-radius: 50%; border: 2px solid #e8650a; display: flex; align-items: center; justify-content: center;">
+                    <img src="{{ url_for('static', filename='images/jes_emblem.png') }}" class="college-logo" style="border: none; margin: 0;" alt="Logo">
+                </div>
+                <div>
+                    <div style="font-size: 0.68rem; font-weight: 700; color: #e8650a; text-transform: uppercase; letter-spacing: 0.5px;">Junnar Education Society</div>
+                    <div class="college-title">S.B.P. Senior College</div>
+                    <div class="dept-subtitle">B.Sc. IT Department</div>
+                </div>
+            </div>
+            <div class="card-type-badge">BSc IT Department Library Card</div>
+        </div>
+
+        <div class="card-body">
+            <div class="photo-container">
+                {% if member.profile_photo %}
+                <img src="{{ url_for('static', filename='uploads/photos/' ~ member.profile_photo) }}" class="photo" alt="Member Photo">
+                {% else %}
+                <div class="photo">{{ member.name[0] | upper }}</div>
+                {% endif %}
+                <div class="active-dot" title="Active Status"></div>
+            </div>
+
+            <div class="info">
+                <h3>{{ member.name }}</h3>
+                <div class="info-row">
+                    <span class="info-label">Division:</span>
+                    <span class="info-val"><span class="year-tag">{{ member.year_division or 'FY (First Year B.Sc. IT)' }}</span></span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Member ID:</span>
+                    <span class="info-val">#LIB-{{ "%04d"|format(member.id) }}</span>
+                </div>
+                {% if member.seat_number %}
+                <div class="info-row">
+                    <span class="info-label">Seat No:</span>
+                    <span class="info-val">{{ member.seat_number }}</span>
+                </div>
+                {% endif %}
+                <div class="info-row">
+                    <span class="info-label">Phone:</span>
+                    <span class="info-val">{{ member.phone or 'N/A' }}</span>
+                </div>
+                <div class="info-row">
+                    <span class="info-label">Valid From:</span>
+                    <span class="info-val">{{ member.membership_date }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="barcode-strip">
+            <div>
+                <span style="font-size: 0.72rem; color: #64748b; display: block;">LIBRARY BARCODE</span>
+                <span class="barcode-lines">||||| | |||| |||</span>
+            </div>
+            <span style="font-size: 0.75rem; font-weight: 700; color: #0f172a;">IT-LIB-2026</span>
+        </div>
+
+        <div class="card-footer">
+            <div>
+                <strong>Non-Transferable</strong><br>
+                <span>Issued by B.Sc. IT Library</span>
+            </div>
+            <div class="signature-box">
+                <span class="sig-line"></span><br>
+                <span>Librarian Sign</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="print-btn-bar">
+        <button class="btn-print" onclick="window.print()">🖨️ Print Library Card</button>
+    </div>
+</body>
+</html>

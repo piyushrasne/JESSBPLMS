@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fine Receipt - Library MS</title>
+    <style>
+        body { font-family: 'Inter', sans-serif; background: #f3f4f6; padding: 40px; color: #111827; }
+        .receipt-card { max-width: 400px; margin: 0 auto; background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .text-center { text-align: center; }
+        .college-name { font-size: 1.2rem; font-weight: bold; margin-bottom: 5px; }
+        .receipt-title { font-size: 1.5rem; margin: 20px 0; font-weight: 800; border-bottom: 1px dashed #ccc; padding-bottom: 10px; }
+        .details-row { display: flex; justify-content: space-between; margin-bottom: 10px; font-size: 0.95rem; }
+        .total-row { display: flex; justify-content: space-between; margin-top: 20px; padding-pt: 15px; border-top: 2px solid #111827; font-size: 1.2rem; font-weight: bold; }
+        .status-stamp { color: #22c55e; border: 2px solid #22c55e; padding: 8px 16px; display: inline-block; font-weight: bold; transform: rotate(-10deg); margin: 20px 0; border-radius: 6px; }
+        @media print {
+            body { background: #fff; padding: 0; }
+            .receipt-card { box-shadow: none; max-width: 100%; border: 1px solid #ccc; }
+            .no-print { display: none; }
+        }
+    </style>
+</head>
+<body>
+    <div class="receipt-card">
+        <div class="text-center">
+            <img src="{{ url_for('static', filename='images/jes_emblem.png') }}" alt="Logo" style="height: 65px; width: auto; object-fit: contain; margin-bottom: 8px;">
+            <div style="font-size: 0.8rem; font-weight: 700; color: #e8650a; text-transform: uppercase;">Junnar Education Society's</div>
+            <div class="college-name" style="font-size: 1.15rem; color: #0f172a;">S.B.P. Senior College</div>
+            <div style="font-size: 0.85rem; color: #475569; font-weight: 600;">B.Sc. IT Department Library</div>
+            <div class="receipt-title">FINE RECEIPT</div>
+        </div>
+        
+        <div class="details-row">
+            <span>Date:</span>
+            <span>{{ today }}</span>
+        </div>
+        <div class="details-row">
+            <span>Transaction ID:</span>
+            <span>#{{ txn.id }}</span>
+        </div>
+        <div class="details-row">
+            <span>Member:</span>
+            <span>{{ txn.member_name }}</span>
+        </div>
+        
+        <div class="total-row">
+            <span>Total Paid:</span>
+            <span>₹{{ '%.2f'|format(txn.fine) }}</span>
+        </div>
+        
+        <div class="text-center">
+            <div class="status-stamp">PAID</div>
+            <p style="font-size: 0.8rem; color: #6b7280;">Thank you!</p>
+        </div>
+        
+        <div class="text-center no-print" style="margin-top: 30px;">
+            <button onclick="window.print()" style="padding: 10px 20px; background: #e8650a; color: #fff; border: none; border-radius: 6px; cursor: pointer; font-weight: bold;">Print Receipt</button>
+            <a href="{{ url_for('transactions') }}" style="display: block; margin-top: 15px; color: #4b5563; text-decoration: none;">Back to Transactions</a>
+        </div>
+    </div>
+</body>
+</html>

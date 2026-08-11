@@ -1,0 +1,179 @@
+{% extends 'base.html' %}
+{% block title %}Issue / Return - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-exchange-alt"></i> Issue & Return Books{% endblock %}
+
+{% block content %}
+
+{% if session.role == 'admin' %}
+<!-- Issue Book Form -->
+<div class="section-header">
+    <h2><i class="fas fa-hand-holding-open"></i> Issue a Book</h2>
+</div>
+<div class="form-card compact">
+    <form method="POST" action="{{ url_for('issue_book') }}" class="lms-form inline-form">
+        <div class="form-row">
+            <div class="form-group" style="flex: 1.2;">
+                <label><i class="fas fa-book"></i> Select Book(s) (Multi-select)</label>
+                <input type="text" id="bookSearchInput" placeholder="🔍 Search book by title, author..." onkeyup="filterBookOptions()" style="width:100%; margin-bottom:8px; padding:8px 12px; border-radius:6px; border:1px solid var(--card-border); background:rgba(255,255,255,0.05); color:var(--text); font-size:0.85rem;">
+                <div id="bookListContainer" class="multi-select-books" style="max-height: 140px; overflow-y: auto; border: 1px solid var(--card-border); padding: 10px; border-radius: 6px; background: rgba(255,255,255,0.04);">
+                    {% for b in books %}
+                    <label class="book-option-label" style="display: block; margin-bottom: 8px; font-weight: normal; cursor: pointer; font-size: 0.88rem;">
+                        <input type="checkbox" name="book_id" value="{{ b.id }}" style="margin-right: 8px;"> 
+                        <span class="book-option-title">{{ b.title }}</span> <small style="color: #94a3b8;">by {{ b.author }} ({{ b.available_copies }} avail)</small>
+                    </label>
+                    {% endfor %}
+                    {% if not books %}
+                    <p style="color: #64748b; font-size: 0.9rem;">No books available</p>
+                    {% endif %}
+                </div>
+            </div>
+            <div class="form-group" style="flex: 1;">
+                <label><i class="fas fa-user"></i> Select Member</label>
+                <select name="user_id" required style="background: rgba(255,255,255,0.05); color: var(--text); padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); width: 100%;">
+                    <option value="" style="background: #1e293b;">-- Select Member --</option>
+                    {% for m in members %}
+                    <option value="{{ m.id }}" style="background: #1e293b;">{{ m.name }} {% if m.year_division %}({{ m.year_division }}){% endif %}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group" style="width: 160px;">
+                <label><i class="fas fa-calendar-alt"></i> Duration (Days)</label>
+                <input type="number" name="days" value="14" min="1" max="90" required style="background: rgba(255,255,255,0.05); color: var(--text); padding: 10px; border-radius: 8px; border: 1px solid var(--card-border); width: 100%;">
+                <small style="color: var(--text-muted); font-size: 0.72rem; display: block; margin-top: 4px;">Customizable by Admin</small>
+            </div>
+        </div>
+        <div class="form-buttons" style="margin-top: 10px;">
+            <button type="submit" class="btn-primary"><i class="fas fa-check"></i> Issue Book</button>
+        </div>
+    </form>
+</div>
+{% endif %}
+
+<!-- Transactions Table -->
+<div class="section-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+    <h2><i class="fas fa-list"></i> Issue / Return Transactions</h2>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <div style="position: relative; min-width: 240px;">
+            <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted);"></i>
+            <input type="text" id="txnSearchInput" placeholder="Search transactions..." onkeyup="searchTxnTable()" style="padding: 8px 12px 8px 36px; border-radius: 8px; border: 1px solid var(--card-border); background: rgba(255,255,255,0.05); color: var(--text); font-size: 0.85rem; width: 100%;">
+        </div>
+    </div>
+</div>
+<div class="filter-row">
+    <button class="filter-btn active" onclick="filterTable('all', this)">All</button>
+    <button class="filter-btn" onclick="filterTable('Issued', this)">Issued</button>
+    <button class="filter-btn" onclick="filterTable('Overdue', this)">Overdue</button>
+    <button class="filter-btn" onclick="filterTable('Returned', this)">Returned</button>
+</div>
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="data-table" id="txnTable">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Book</th>
+                    <th>Member</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Return Date</th>
+                    <th>Fine</th>
+                    <th>Status</th>
+                    {% if session.role == 'admin' %}<th>Action</th>{% endif %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in transactions %}
+                {% set is_overdue = t.status == 'issued' and t.due_date < today %}
+                <tr data-status="{{ 'Overdue' if is_overdue else (t.status | capitalize) }}">
+                    <td>{{ t.id }}</td>
+                    <td><span class="book-title">{{ t.book_title }}</span></td>
+                    <td>{{ t.member_name }}</td>
+                    <td>{{ t.issue_date }}</td>
+                    <td class="{{ 'text-danger' if is_overdue else '' }}">{{ t.due_date }}</td>
+                    <td>{{ t.return_date or '-' }}</td>
+                    <td>{% if t.fine > 0 %}<span class="fine-amt">₹{{ '%.2f'|format(t.fine) }}</span>{% else %}-{% endif %}</td>
+                    <td>
+                        <span class="badge badge-{{ 'danger' if is_overdue else ('success' if t.status == 'returned' else 'warning') }}">
+                            {{ 'Overdue' if is_overdue else (t.status | capitalize) }}
+                        </span>
+                    </td>
+                    {% if session.role == 'admin' %}
+                    <td>
+                        <div style="display: flex; gap: 8px;">
+                            {% if t.status == 'issued' %}
+                            <form method="POST" action="{{ url_for('return_book', txn_id=t.id) }}">
+                                <button type="submit" class="btn-return" title="Mark as Returned" onclick="return confirm('Mark as returned?')">
+                                    <i class="fas fa-undo"></i> Return
+                                </button>
+                            </form>
+                            {% elif t.status == 'returned' and t.fine > 0 and not t.fine_paid %}
+                            <form method="POST" action="{{ url_for('pay_fine', txn_id=t.id) }}">
+                                <button type="submit" class="btn-primary" style="padding: 6px 10px; font-size: 0.75rem;" title="Mark Fine as Paid & Generate Receipt">
+                                    <i class="fas fa-rupee-sign"></i> Pay Fine
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ url_for('delete_fine', txn_id=t.id) }}" onsubmit="return confirm('Delete this fine without receipt?')">
+                                <button type="submit" class="btn-secondary" style="padding: 6px 10px; font-size: 0.75rem; color: #ef4444;" title="Delete Fine">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                            {% else %}
+                            <span class="text-muted">Completed</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    {% endif %}
+                </tr>
+                {% else %}
+                <tr><td colspan="9" class="empty-row">No transactions found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<!-- DataTables for sorting -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/1.13.6/css/jquery.dataTables.min.css">
+<script src="https://cdn.datatables.net/1.13.6/js/jquery.dataTables.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#txnTable').DataTable({
+        "pageLength": 10,
+        "order": [[ 0, "desc" ]]
+    });
+});
+function filterTable(status, btn) {
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    const rows = document.querySelectorAll('#txnTable tbody tr');
+    rows.forEach(row => {
+        if (status === 'all' || row.dataset.status === status) {
+            row.style.display = '';
+        } else {
+            row.style.display = 'none';
+        }
+    });
+}
+
+function filterBookOptions() {
+    const filter = document.getElementById('bookSearchInput').value.toLowerCase();
+    const labels = document.querySelectorAll('.book-option-label');
+    labels.forEach(label => {
+        const text = label.textContent.toLowerCase();
+        label.style.display = text.includes(filter) ? 'block' : 'none';
+    });
+}
+
+function searchTxnTable() {
+    const filter = document.getElementById('txnSearchInput').value.toLowerCase();
+    const rows = document.querySelectorAll('#txnTable tbody tr');
+    rows.forEach(row => {
+        const text = row.textContent.toLowerCase();
+        row.style.display = text.includes(filter) ? '' : 'none';
+    });
+}
+</script>
+{% endblock %}

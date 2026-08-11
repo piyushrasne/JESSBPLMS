@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Edit Member - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-user-edit"></i> Edit Member{% endblock %}
+{% block content %}
+<div class="form-card">
+    <form method="POST" class="lms-form" enctype="multipart/form-data">
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-user"></i> Full Name *</label>
+                <input type="text" name="name" value="{{ member.name }}" required>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-envelope"></i> Email Address *</label>
+                <input type="email" name="email" value="{{ member.email }}" required>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-phone"></i> Phone Number</label>
+                <input type="tel" name="phone" value="{{ member.phone or '' }}">
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-toggle-on"></i> Status</label>
+                <label class="toggle-switch">
+                    <input type="checkbox" name="is_active" {% if member.is_active %}checked{% endif %}>
+                    <span class="toggle-slider"></span>
+                    <span class="toggle-label">Active</span>
+                </label>
+            </div>
+        </div>
+        <div class="form-row">
+            <div class="form-group">
+                <label><i class="fas fa-graduation-cap"></i> Student Year / Division *</label>
+                <select name="year_division" required style="background: rgba(255,255,255,0.05); color: var(--text); padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.1); width: 100%;">
+                    <option value="FY (First Year B.Sc. IT)" {% if member.year_division == 'FY (First Year B.Sc. IT)' %}selected{% endif %} style="background: #1e293b;">FY - First Year (B.Sc. IT)</option>
+                    <option value="SY (Second Year B.Sc. IT)" {% if member.year_division == 'SY (Second Year B.Sc. IT)' %}selected{% endif %} style="background: #1e293b;">SY - Second Year (B.Sc. IT)</option>
+                    <option value="TY (Third Year B.Sc. IT)" {% if member.year_division == 'TY (Third Year B.Sc. IT)' %}selected{% endif %} style="background: #1e293b;">TY - Third Year (B.Sc. IT)</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label><i class="fas fa-chair"></i> Seat Number</label>
+                <input type="text" name="seat_number" value="{{ member.seat_number or '' }}" placeholder="e.g. A-12">
+            </div>
+        </div>
+            <div class="form-group">
+                <label><i class="fas fa-camera"></i> Profile Photo</label>
+                <input type="file" name="profile_photo" accept="image/*">
+                {% if member.profile_photo %}
+                <div style="margin-top: 5px; display: flex; align-items: center; gap: 10px;">
+                    <img src="{{ url_for('static', filename='uploads/photos/' ~ member.profile_photo) }}" alt="Current Photo" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 1px solid #ddd;">
+                    <small style="color: #64748b;">Current photo</small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        <div class="form-group full-width">
+            <label><i class="fas fa-map-marker-alt"></i> Address</label>
+            <textarea name="address" rows="2">{{ member.address or '' }}</textarea>
+        </div>
+        <div class="form-buttons">
+            <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Update Member</button>
+            <a href="{{ url_for('members') }}" class="btn-secondary"><i class="fas fa-times"></i> Cancel</a>
+        </div>
+    </form>
+</div>
+{% endblock %}

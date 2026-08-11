@@ -1,0 +1,154 @@
+{% extends 'base.html' %}
+{% block title %}Reports - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-chart-bar"></i> Reports & Analytics{% endblock %}
+
+{% block content %}
+<!-- Summary cards -->
+<div class="stats-grid">
+    <div class="stat-card fines">
+        <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+        <div class="stat-info"><h3>₹{{ total_fines }}</h3><p>Total Fines Collected</p></div>
+        <div class="stat-bg"><i class="fas fa-rupee-sign"></i></div>
+    </div>
+    <div class="stat-card overdue">
+        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+        <div class="stat-info"><h3>₹{{ pending_fines }}</h3><p>Pending Fines (Overdue)</p></div>
+        <div class="stat-bg"><i class="fas fa-clock"></i></div>
+    </div>
+    <div class="stat-card issued">
+        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-info"><h3>{{ overdue_books|length }}</h3><p>Overdue Books</p></div>
+        <div class="stat-bg"><i class="fas fa-exclamation-triangle"></i></div>
+    </div>
+</div>
+
+<!-- Monthly Stats -->
+<div class="reports-grid">
+    <div class="report-card">
+        <h3><i class="fas fa-calendar-alt"></i> Monthly Issues</h3>
+        <div class="bar-chart">
+            {% set max_count = monthly | map('count') | max if monthly else 1 %}
+            {% for m in monthly %}
+            <div class="bar-item">
+                <div class="bar-fill" style="height: {{ (m.count / max_count * 100)|round|int }}%">
+                    <span class="bar-val">{{ m.count }}</span>
+                </div>
+                <span class="bar-label">{{ m.month }}</span>
+            </div>
+            {% else %}
+            <p class="no-data">No data available</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="report-card">
+        <h3><i class="fas fa-trophy"></i> Most Borrowed Books</h3>
+        <div class="popular-list">
+            {% for b in popular_books %}
+            <div class="popular-item">
+                <span class="rank">{{ loop.index }}</span>
+                <div class="popular-info">
+                    <strong>{{ b.title }}</strong>
+                    <small>{{ b.author }}</small>
+                </div>
+                <span class="borrow-count">{{ b.borrow_count }}x</span>
+            </div>
+            {% else %}
+            <p class="no-data">No data available</p>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="report-card">
+        <h3><i class="fas fa-tags"></i> Issues by Category</h3>
+        <div class="category-chart">
+            {% set max_cat = cat_stats | map(attribute='cnt') | max if cat_stats else 1 %}
+            {% for c in cat_stats %}
+            <div class="cat-item">
+                <span class="cat-name">{{ c.category }}</span>
+                <div class="cat-bar-track">
+                    <div class="cat-bar-fill" style="width: {{ (c.cnt / max_cat * 100)|round|int }}%"></div>
+                </div>
+                <span class="cat-count">{{ c.cnt }}</span>
+            </div>
+            {% else %}
+            <p class="no-data">No data available</p>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+
+<!-- Overdue Books -->
+<div class="section-header">
+    <h2><i class="fas fa-exclamation-triangle"></i> Overdue Books</h2>
+</div>
+<div class="table-card" style="margin-bottom: 30px;">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr><th>#</th><th>Book</th><th>Member</th><th>Phone</th><th>Issue Date</th><th>Due Date</th></tr>
+            </thead>
+            <tbody>
+                {% for o in overdue_books %}
+                <tr class="overdue-row">
+                    <td>{{ loop.index }}</td>
+                    <td><span class="book-title">{{ o.book_title }}</span></td>
+                    <td>{{ o.member_name }}</td>
+                    <td>{{ o.phone or '-' }}</td>
+                    <td>{{ o.issue_date }}</td>
+                    <td class="text-danger">{{ o.due_date }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="empty-row"><i class="fas fa-check-circle"></i> No overdue books! Great job.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Paid Fine Payment Receipts (Admin Only) -->
+<div class="section-header">
+    <h2><i class="fas fa-file-invoice-dollar" style="color: var(--success);"></i> Paid Fine Receipts (Admin Only)</h2>
+</div>
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Txn ID</th>
+                    <th>Member</th>
+                    <th>Book Title</th>
+                    <th>Fine Paid</th>
+                    <th>Return / Payment Date</th>
+                    <th>Receipt</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in paid_receipts %}
+                <tr>
+                    <td>#{{ r.id }}</td>
+                    <td><strong>{{ r.member_name }}</strong></td>
+                    <td>{{ r.book_title }}</td>
+                    <td><span class="fine-amt" style="color: var(--success); font-weight: 700;">₹{{ '%.2f'|format(r.fine) }}</span></td>
+                    <td>{{ r.return_date or today }}</td>
+                    <td>
+                        <a href="{{ url_for('print_receipt', txn_id=r.id) }}" target="_blank" class="btn-primary" style="padding: 6px 14px; font-size: 0.8rem; display: inline-flex; align-items: center; gap: 6px;">
+                            <i class="fas fa-receipt"></i> Print Receipt
+                        </a>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="6" class="empty-row">No fine payment receipts recorded yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+const today = "{{ today }}";
+</script>
+{% endblock %}

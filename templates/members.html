@@ -1,0 +1,81 @@
+{% extends 'base.html' %}
+{% block title %}Members - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-users"></i> Members{% endblock %}
+{% block content %}
+<div class="page-actions">
+    <form class="search-form" method="GET">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" name="q" placeholder="Search by name or email..." value="{{ q }}">
+        </div>
+        <button type="submit" class="btn-primary"><i class="fas fa-search"></i> Search</button>
+        {% if q %}<a href="{{ url_for('members') }}" class="btn-secondary">Clear</a>{% endif %}
+    </form>
+    <div class="action-buttons">
+        <a href="{{ url_for('add_member') }}" class="btn-primary"><i class="fas fa-user-plus"></i> Add Member</a>
+    </div>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Member</th>
+                    <th>Year / Division</th>
+                    <th>Email</th>
+                    <th>Phone</th>
+                    <th>Joined</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for m in members %}
+                <tr>
+                    <td>{{ m.id }}</td>
+                    <td>
+                        <div class="member-cell">
+                            {% if m.profile_photo %}
+                            <img src="{{ url_for('static', filename='uploads/photos/' ~ m.profile_photo) }}" alt="Photo" class="member-avatar">
+                            {% else %}
+                            <div class="member-avatar">{{ m.name[0] | upper }}</div>
+                            {% endif %}
+                            <div>
+                                <strong class="member-name-text">{{ m.name }}</strong>
+                                {% if m.seat_number %}<small style="color: var(--text-muted); font-size: 0.8rem; display: block;">Seat: {{ m.seat_number }}</small>{% endif %}
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <span class="badge badge-info" style="font-weight: 600;">
+                            <i class="fas fa-graduation-cap"></i> {{ m.year_division or 'FY (First Year)' }}
+                        </span>
+                    </td>
+                    <td>{{ m.email }}</td>
+                    <td>{{ m.phone or '-' }}</td>
+                    <td>{{ m.membership_date }}</td>
+                    <td>
+                        <span class="badge badge-{{ 'success' if m.is_active else 'danger' }}">
+                            {{ 'Active' if m.is_active else 'Inactive' }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="action-btns">
+                            <a href="{{ url_for('print_member_card', member_id=m.id) }}" target="_blank" class="btn-icon" title="Print Membership Card" style="color: #0ea5e9;"><i class="fas fa-id-card"></i></a>
+                            <a href="{{ url_for('edit_member', member_id=m.id) }}" class="btn-icon edit" title="Edit"><i class="fas fa-edit"></i></a>
+                            <form method="POST" action="{{ url_for('delete_member', member_id=m.id) }}" onsubmit="return confirm('Delete member {{ m.name }}?')">
+                                <button type="submit" class="btn-icon delete" title="Delete"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="empty-row">No members found.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

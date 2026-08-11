@@ -1,0 +1,142 @@
+{% extends 'base.html' %}
+{% block title %}Books - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-book"></i> Books Catalog{% endblock %}
+
+{% block content %}
+<div class="page-actions">
+    <form class="search-form" method="GET">
+        <div class="search-bar">
+            <i class="fas fa-search"></i>
+            <input type="text" name="q" placeholder="Search by title, author, ISBN..." value="{{ q }}">
+        </div>
+        <select name="category" class="filter-select">
+            <option value="">All Categories</option>
+            {% for cat in categories %}
+            <option value="{{ cat.category }}" {% if selected_cat == cat.category %}selected{% endif %}>{{ cat.category }}</option>
+            {% endfor %}
+        </select>
+        <button type="submit" class="btn-primary"><i class="fas fa-search"></i> Search</button>
+        {% if q or selected_cat %}<a href="{{ url_for('books') }}" class="btn-secondary">Clear</a>{% endif %}
+    </form>
+    {% if session.role == 'admin' %}
+    <div class="action-buttons">
+        <a href="{{ url_for('add_book') }}" class="btn-primary"><i class="fas fa-plus"></i> Add Book</a>
+        <button type="button" class="btn-secondary" onclick="document.getElementById('importModal').style.display='flex'">
+            <i class="fas fa-file-excel"></i> Import
+        </button>
+    </div>
+    {% endif %}
+</div>
+
+{% if session.role == 'admin' %}
+<!-- Import Modal (Full Screen Overlay) -->
+<div id="importModal" class="modal" style="display:none; position:fixed; inset:0; top:0; left:0; width:100vw; height:100vh; z-index:99999; background:rgba(15,23,42,0.85); backdrop-filter:blur(8px); align-items:center; justify-content:center; padding:20px;">
+    <div class="modal-content" style="background-color: var(--card-bg); width: 100%; max-width: 620px; border-radius: 16px; padding: 32px; border: 1px solid var(--card-border); box-shadow: 0 25px 50px -12px rgba(0,0,0,0.7); color: var(--text); position: relative; max-height: 90vh; overflow-y: auto;">
+        <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid var(--card-border); padding-bottom: 16px; margin-bottom: 24px;">
+            <h2 style="font-size: 1.35rem; font-weight: 700; margin: 0; display: flex; align-items: center; gap: 12px; color: var(--text);">
+                <i class="fas fa-file-excel" style="color: #22c55e; font-size: 1.5rem;"></i> Import Books via Excel
+            </h2>
+            <span class="close" onclick="document.getElementById('importModal').style.display='none'" style="color: var(--text-muted); font-size: 28px; font-weight: bold; cursor: pointer; line-height: 1; transition: color 0.2s;" onmouseover="this.style.color='var(--text)'" onmouseout="this.style.color='var(--text-muted)'">&times;</span>
+        </div>
+        
+        <form action="{{ url_for('import_books') }}" method="POST" enctype="multipart/form-data">
+            <div class="form-group" style="margin-bottom: 24px;">
+                <label style="font-weight: 600; font-size: 0.95rem; margin-bottom: 10px; display: block; color: var(--text);">Select Excel File (.xlsx)</label>
+                <div style="border: 2px dashed var(--primary); padding: 30px 20px; text-align: center; border-radius: 12px; background: rgba(232,101,10,0.03); transition: all 0.2s;">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 12px; display: block;"></i>
+                    <input type="file" name="excel_file" accept=".xlsx" required style="width: 100%; color: var(--text); padding: 8px; font-size: 0.95rem;">
+                    <small style="color: var(--text-muted); display: block; margin-top: 10px; font-size: 0.85rem;">Upload structured spreadsheet containing book details</small>
+                </div>
+            </div>
+
+            <div style="background: rgba(255,255,255,0.04); border-left: 4px solid var(--primary); padding: 14px 18px; border-radius: 8px; margin-bottom: 28px; font-size: 0.88rem; color: var(--text-muted); line-height: 1.5;">
+                <strong style="color: var(--text); display: block; margin-bottom: 6px; font-size: 0.92rem;"><i class="fas fa-info-circle" style="color: var(--primary);"></i> Required Excel Header Columns:</strong>
+                <span style="color: var(--text);">Title, Author, ISBN, Category, Publisher, Year, Copies, Description</span>
+            </div>
+
+            <div style="display: flex; gap: 14px; justify-content: flex-end;">
+                <button type="button" class="btn-secondary" onclick="document.getElementById('importModal').style.display='none'" style="padding: 12px 24px; font-size: 0.95rem;">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary" style="padding: 12px 28px; font-size: 0.95rem; font-weight: 700; display: inline-flex; align-items: center; gap: 8px;">
+                    <i class="fas fa-upload"></i> Upload & Import
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+<div class="results-info">
+    Showing <strong>{{ books|length }}</strong> book(s)
+    {% if q %} for "<em>{{ q }}</em>"{% endif %}
+    {% if selected_cat %} in <em>{{ selected_cat }}</em>{% endif %}
+</div>
+
+<div class="books-grid">
+    {% for book in books %}
+    <div class="book-card">
+        <div class="book-cover" {% if book.book_cover %}style="padding:0; background:none;"{% endif %}>
+            {% if book.book_cover %}
+            <img src="{{ url_for('static', filename='uploads/covers/' + book.book_cover) }}" alt="Cover" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px 6px 0 0; display: block;">
+            {% else %}
+            <i class="fas fa-book-open"></i>
+            {% endif %}
+            <span class="book-cat-badge" style="z-index: 2;">{{ book.category or 'General' }}</span>
+        </div>
+        <div class="book-info">
+            <h3 class="book-title" title="{{ book.title }}">{{ book.title }}</h3>
+            <p class="book-author"><i class="fas fa-user-pen"></i> {{ book.author }}</p>
+            <p class="book-isbn"><i class="fas fa-barcode"></i> {{ book.isbn or 'N/A' }}</p>
+            <p class="book-publisher"><i class="fas fa-building"></i> {{ book.publisher or 'N/A' }} ({{ book.year or '-' }})</p>
+            <div class="book-availability">
+                <span class="avail-badge {% if book.available_copies > 0 %}avail{% else %}unavail{% endif %}">
+                    {% if book.available_copies > 0 %}
+                        <i class="fas fa-check-circle"></i> {{ book.available_copies }}/{{ book.total_copies }} Available
+                    {% else %}
+                        <i class="fas fa-times-circle"></i> Not Available
+                    {% endif %}
+                </span>
+            </div>
+        </div>
+        {% if session.role == 'admin' %}
+        <div class="book-actions">
+            <button onclick="printQR({{ book.id }}, '{{ book.title | replace("'", "\\'") }}')" class="btn-icon" title="Print QR Code Label" style="color:#007bff; background:none; border:none; cursor:pointer;"><i class="fas fa-qrcode"></i></button>
+            <a href="{{ url_for('edit_book', book_id=book.id) }}" class="btn-icon edit" title="Edit"><i class="fas fa-edit"></i></a>
+            <form method="POST" action="{{ url_for('delete_book', book_id=book.id) }}" onsubmit="return confirm('Delete this book?')">
+                <button type="submit" class="btn-icon delete" title="Delete"><i class="fas fa-trash"></i></button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="empty-state">
+        <i class="fas fa-book-open"></i>
+        <h3>No books found</h3>
+        <p>Try a different search term or add new books.</p>
+    </div>
+    {% endfor %}
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function printQR(bookId, title) {
+    const qrUrl = `/api/qr/${bookId}`;
+    const printWindow = window.open('', '_blank', 'width=400,height=500');
+    printWindow.document.write(`
+        <html>
+            <head><title>Print Label</title></head>
+            <body style="text-align:center; padding-top:40px; font-family:sans-serif;">
+                <div style="border: 2px solid #000; display: inline-block; padding: 20px; border-radius: 8px;">
+                    <h3 style="margin: 0 0 10px 0;">Library Label</h3>
+                    <img src="${qrUrl}" style="max-width:200px; max-height:200px;" onload="window.print()">
+                    <p style="margin: 10px 0 0 0; font-size: 14px; max-width: 200px; word-wrap: break-word;">${title}</p>
+                </div>
+            </body>
+        </html>
+    `);
+    printWindow.document.close();
+}
+</script>
+{% endblock %}

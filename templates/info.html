@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block title %}Project Info - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-info-circle"></i> Project Information{% endblock %}
+
+{% block content %}
+<div class="info-page">
+
+    <!-- Hero Banner -->
+    <div class="info-hero" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 28px; margin-bottom: 24px;">
+        <div class="info-hero-text">
+            <h1 style="font-size: 1.8rem; margin-bottom: 10px;"><i class="fas fa-book-open" style="color: var(--primary);"></i> Library Management System</h1>
+            <p class="info-hero-sub" style="color: var(--text-muted); line-height: 1.6; margin-bottom: 16px;">A full-stack web application for managing library books, members, and transactions — built with Python, Flask, SQLite, HTML, CSS & JavaScript.</p>
+        </div>
+    </div>
+
+    <!-- Project Overview -->
+    <div class="section-header"><h2><i class="fas fa-clipboard-list"></i> Project Overview</h2></div>
+    <div class="info-card" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 24px; margin-bottom: 24px;">
+        <p style="margin-bottom: 16px; line-height: 1.6;">The <strong>Library Management System (LMS)</strong> is a web-based application designed to automate and streamline all day-to-day operations of a library. It replaces manual record-keeping with a secure, fast, and easy-to-use digital platform.</p>
+        <div class="info-overview-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+            <div class="overview-item" style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 10px; border: 1px solid var(--card-border);"><strong>Developer</strong><br><span style="color: var(--text-muted);">Piyush Rasne</span></div>
+            <div class="overview-item" style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 10px; border: 1px solid var(--card-border);"><strong>College</strong><br><span style="color: var(--text-muted);">Shankarrao Butte Patil Senior College, Junnar</span></div>
+            <div class="overview-item" style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 10px; border: 1px solid var(--card-border);"><strong>Server</strong><br><span style="color: var(--text-muted);">Flask (localhost:3000)</span></div>
+            <div class="overview-item" style="background: rgba(255,255,255,0.03); padding: 14px; border-radius: 10px; border: 1px solid var(--card-border);"><strong>Database</strong><br><span style="color: var(--text-muted);">SQLite (library.db)</span></div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

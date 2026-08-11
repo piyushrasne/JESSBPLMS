@@ -1,0 +1,147 @@
+{% extends 'base.html' %}
+{% block title %}Database Management - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-database"></i> Database Management{% endblock %}
+
+{% block content %}
+<!-- DB Stats -->
+<div class="stats-grid" style="margin-bottom: 24px;">
+    <div class="stat-card" style="border-left: 4px solid var(--primary);">
+        <div class="stat-icon"><i class="fas fa-database" style="color: var(--primary);"></i></div>
+        <div class="stat-info">
+            <h3>{{ tables|length }}</h3>
+            <p>Tables Created</p>
+        </div>
+    </div>
+    <div class="stat-card" style="border-left: 4px solid var(--info);">
+        <div class="stat-icon"><i class="fas fa-table" style="color: var(--info);"></i></div>
+        <div class="stat-info">
+            <h3>{{ selected_table }}</h3>
+            <p>Active Selected Table</p>
+        </div>
+    </div>
+    <div class="stat-card" style="border-left: 4px solid var(--success);">
+        <div class="stat-icon"><i class="fas fa-layer-group" style="color: var(--success);"></i></div>
+        <div class="stat-info">
+            <h3>{{ table_counts[selected_table] or (rows|length) }}</h3>
+            <p>Total Records in Table</p>
+        </div>
+    </div>
+</div>
+
+<!-- Table Selector Tabs -->
+<div class="card-bg" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 18px; margin-bottom: 24px;">
+    <div style="font-weight: 700; margin-bottom: 12px; color: var(--text-muted); font-size: 0.85rem; text-transform: uppercase; letter-spacing: 0.5px;">
+        <i class="fas fa-folder"></i> Database Tables
+    </div>
+    <div style="display: flex; gap: 10px; flex-wrap: wrap;">
+        {% for t in tables %}
+        <a href="{{ url_for('admin_database', table=t) }}" 
+           class="btn-sm" 
+           style="padding: 9px 16px; border-radius: 8px; text-decoration: none; font-weight: 600; font-size: 0.85rem; display: inline-flex; align-items: center; gap: 8px; transition: all 0.2s; {% if selected_table == t %}background: linear-gradient(135deg, var(--primary), var(--primary-dark)); color: #fff; box-shadow: 0 4px 12px rgba(232,101,10,0.3);{% else %}background: rgba(255,255,255,0.05); color: var(--text-muted); border: 1px solid var(--card-border);{% endif %}">
+            <i class="fas fa-table"></i> {{ t }}
+            <span style="background: rgba(0,0,0,0.25); padding: 2px 7px; border-radius: 12px; font-size: 0.75rem;">{{ table_counts[t] or 0 }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+
+<!-- SQL Console Accordion -->
+<div class="card-bg" style="background: var(--card-bg); border: 1px solid var(--card-border); border-radius: var(--radius); padding: 20px; margin-bottom: 24px;">
+    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+        <h3 style="font-size: 1.1rem; font-weight: 700; margin: 0;"><i class="fas fa-terminal" style="color: var(--primary);"></i> SQL Query Executor</h3>
+        <small style="color: var(--text-muted);">Execute custom SQL statements for project testing & inspection</small>
+    </div>
+    <form action="{{ url_for('admin_database_query') }}" method="POST" style="display: flex; gap: 12px; flex-direction: column;">
+        <textarea name="sql_query" rows="2" placeholder="e.g. SELECT * FROM users WHERE role = 'admin'" style="width: 100%; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border); border-radius: 8px; color: var(--text); padding: 12px; font-family: monospace; font-size: 0.9rem;" required>{{ sql_query or '' }}</textarea>
+        <div style="display: flex; justify-content: flex-end; gap: 10px;">
+            <button type="submit" class="btn-primary" style="padding: 10px 20px;"><i class="fas fa-play"></i> Run Query</button>
+        </div>
+    </form>
+</div>
+
+<!-- Query Results if executed -->
+{% if query_results is defined %}
+<div class="section-header">
+    <h2><i class="fas fa-poll-h"></i> Query Results</h2>
+</div>
+<div class="table-card" style="margin-bottom: 30px;">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    {% for col in query_columns %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in query_results %}
+                <tr>
+                    {% for col in query_columns %}
+                    <td>{{ r[col] }}</td>
+                    {% endfor %}
+                </tr>
+                {% else %}
+                <tr><td colspan="{{ query_columns|length or 1 }}" class="empty-row">No records returned.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endif %}
+
+<!-- Table Contents Card -->
+<div class="section-header" style="display: flex; justify-content: space-between; align-items: center;">
+    <h2><i class="fas fa-list-alt"></i> Table: <span style="color: var(--primary);">{{ selected_table }}</span></h2>
+    <form method="GET" style="display: flex; gap: 8px;">
+        <input type="hidden" name="table" value="{{ selected_table }}">
+        <input type="text" name="q" value="{{ q or '' }}" placeholder="Search in {{ selected_table }}..." style="background: rgba(255,255,255,0.05); border: 1px solid var(--card-border); border-radius: 8px; color: var(--text); padding: 8px 12px; font-size: 0.85rem;">
+        <button type="submit" class="btn-primary" style="padding: 8px 14px;"><i class="fas fa-search"></i> Filter</button>
+        {% if q %}<a href="{{ url_for('admin_database', table=selected_table) }}" class="btn-secondary" style="padding: 8px 12px;">Clear</a>{% endif %}
+    </form>
+</div>
+
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    {% for col in columns %}
+                    <th>{{ col }}</th>
+                    {% endfor %}
+                    <th style="text-align: right;">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for r in rows %}
+                {% set row_pk = r['id'] if 'id' in columns else r[columns[0]] %}
+                <tr>
+                    {% for col in columns %}
+                    <td style="max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">
+                        {% if col in ['profile_photo', 'book_cover'] and r[col] %}
+                        <span class="badge badge-info"><i class="fas fa-image"></i> {{ r[col] }}</span>
+                        {% elif r[col] is none %}
+                        <span style="color: var(--text-muted); font-style: italic;">NULL</span>
+                        {% else %}
+                        {{ r[col] }}
+                        {% endif %}
+                    </td>
+                    {% endfor %}
+                    <td style="text-align: right;">
+                        <div style="display: inline-flex; gap: 6px;">
+                            <a href="{{ url_for('admin_database_edit', table_name=selected_table, row_id=row_pk) }}" class="btn-icon edit" title="Edit Row"><i class="fas fa-edit"></i></a>
+                            <form method="POST" action="{{ url_for('admin_database_delete', table_name=selected_table, row_id=row_pk) }}" onsubmit="return confirm('Delete this record from {{ selected_table }}?')" style="display: inline;">
+                                <button type="submit" class="btn-icon delete" title="Delete Row"><i class="fas fa-trash"></i></button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="{{ columns|length + 1 }}" class="empty-row">No records found in table '{{ selected_table }}'.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+{% block title %}My Profile - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-user-circle"></i> My Profile{% endblock %}
+{% block content %}
+<div class="profile-page">
+    <div class="profile-header-card">
+        {% if user.profile_photo %}
+        <img src="{{ url_for('static', filename='uploads/photos/' ~ user.profile_photo) }}" alt="Photo" class="profile-avatar-img">
+        {% else %}
+        <div class="profile-avatar-lg">{{ session.user_name[0] | upper }}</div>
+        {% endif %}
+        <div class="profile-meta">
+            <h2>{{ user.name }}</h2>
+            <p>
+                <span class="badge badge-{{ 'success' if user.role == 'admin' else 'info' }}">{{ user.role | capitalize }}</span>
+                {% if user.role != 'admin' %}
+                    {% if user.year_division %}<span class="badge badge-info"><i class="fas fa-graduation-cap"></i> {{ user.year_division }}</span>{% endif %}
+                    {% if user.seat_number %}<span class="badge badge-warning"><i class="fas fa-chair"></i> Seat: {{ user.seat_number }}</span>{% endif %}
+                {% endif %}
+            </p>
+            <p><i class="fas fa-calendar-alt"></i> Member since {{ user.membership_date }}</p>
+        </div>
+    </div>
+
+    <div class="form-card">
+        <h3 class="form-section-title"><i class="fas fa-edit"></i> Update Account Details</h3>
+        <form method="POST" class="lms-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-user"></i> Full Name</label>
+                    <input type="text" name="name" value="{{ user.name }}" required>
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-envelope"></i> Email Address</label>
+                    <input type="email" value="{{ user.email }}" disabled class="input-disabled">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label><i class="fas fa-phone"></i> Phone Number</label>
+                    <input type="tel" name="phone" value="{{ user.phone or '' }}" placeholder="Phone number">
+                </div>
+                <div class="form-group">
+                    <label><i class="fas fa-lock"></i> New Password</label>
+                    <input type="password" name="new_password" placeholder="Leave blank to keep current">
+                </div>
+            </div>
+            <div class="form-group full-width">
+                <label><i class="fas fa-map-marker-alt"></i> Address</label>
+                <textarea name="address" rows="3" placeholder="Your address">{{ user.address or '' }}</textarea>
+            </div>
+            <div class="form-buttons">
+                <button type="submit" class="btn-primary"><i class="fas fa-save"></i> Save Profile Changes</button>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

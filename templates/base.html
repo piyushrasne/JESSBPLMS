@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Library Management System{% endblock %}</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+    {% if session.user_id %}
+    <!-- Sidebar -->
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo" style="display: flex; align-items: center; gap: 12px;">
+                <div class="logo-badge-container" style="padding: 4px 8px; border-radius: 12px;">
+                    <img src="{{ url_for('static', filename='images/jes_emblem.png') }}" alt="JES Logo" style="height: 36px; width: auto; object-fit: contain; display: block;">
+                </div>
+                <div style="display: flex; flex-direction: column; line-height: 1.2;">
+                    <span style="font-size: 0.95rem; font-weight: 800; color: #fff; letter-spacing: 0.2px; font-family: 'Outfit', sans-serif;">S.B.P. Sr. College</span>
+                    <span style="font-size: 0.72rem; color: var(--primary-light); font-weight: 700; letter-spacing: 0.5px;">B.Sc. IT Library</span>
+                </div>
+            </div>
+            <button class="sidebar-close" id="sidebarClose"><i class="fas fa-times"></i></button>
+        </div>
+        <nav class="sidebar-nav">
+            <a href="{{ url_for('dashboard') }}" class="nav-item {% if request.endpoint == 'dashboard' %}active{% endif %}">
+                <i class="fas fa-home"></i><span>Dashboard</span>
+            </a>
+            <a href="{{ url_for('books') }}" class="nav-item {% if 'book' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-book"></i><span>Books</span>
+            </a>
+            {% if session.role == 'admin' %}
+            <a href="{{ url_for('members') }}" class="nav-item {% if 'member' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-users"></i><span>Members</span>
+            </a>
+            {% endif %}
+            <a href="{{ url_for('transactions') }}" class="nav-item {% if 'transaction' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-exchange-alt"></i><span>Issue / Return</span>
+            </a>
+            {% if session.role == 'admin' %}
+            <a href="{{ url_for('reports') }}" class="nav-item {% if request.endpoint == 'reports' %}active{% endif %}">
+                <i class="fas fa-chart-bar"></i><span>Reports</span>
+            </a>
+            <a href="{{ url_for('audit_logs') }}" class="nav-item {% if request.endpoint == 'audit_logs' %}active{% endif %}">
+                <i class="fas fa-clipboard-list"></i><span>Audit Logs</span>
+            </a>
+            {% endif %}
+            <a href="{{ url_for('profile') }}" class="nav-item {% if request.endpoint == 'profile' %}active{% endif %}">
+                <i class="fas fa-user-circle"></i><span>Profile</span>
+            </a>
+            <a href="https://jessbpjunnar.org/" target="_blank" class="nav-item">
+                <i class="fas fa-external-link-alt"></i><span>College Website</span>
+            </a>
+            {% if session.role == 'admin' %}
+            <a href="{{ url_for('admin_database') }}" class="nav-item {% if 'database' in request.endpoint %}active{% endif %}">
+                <i class="fas fa-database"></i><span>Database</span>
+            </a>
+            {% endif %}
+        </nav>
+        <div class="sidebar-footer">
+            <div class="user-info">
+                {% if session.user_photo %}
+                <img src="{{ url_for('static', filename='uploads/photos/' ~ session.user_photo) }}" alt="Avatar" class="user-avatar" style="object-fit: cover; border: 2px solid var(--primary);">
+                {% else %}
+                <div class="user-avatar">{{ session.user_name[0] | upper }}</div>
+                {% endif %}
+                <div>
+                    <div class="user-name">{{ session.user_name }}</div>
+                    <div class="user-role">{{ session.role | capitalize }}</div>
+                </div>
+            </div>
+            <a href="{{ url_for('logout') }}" class="logout-btn" title="Logout"><i class="fas fa-sign-out-alt"></i></a>
+        </div>
+    </aside>
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <header class="top-bar">
+            <button class="menu-toggle" id="menuToggle"><i class="fas fa-bars"></i></button>
+            <div class="page-title">{% block page_title %}{% endblock %}</div>
+            <div class="top-bar-right" style="display: flex; align-items: center;">
+                <!-- Notifications Dropdown -->
+                <div class="notifications-wrapper" style="position: relative; margin-right: 20px; display: inline-block;">
+                    <button id="notifToggle" class="btn-icon" style="background:none; border:none; color:#64748b; font-size:1.2rem; cursor:pointer; position:relative;">
+                        <i class="fas fa-bell"></i>
+                        {% if unread_count and unread_count > 0 %}
+                        <span style="position:absolute; top:-5px; right:-5px; background:#ef4444; color:#fff; font-size:0.7rem; width:18px; height:18px; border-radius:50%; display:flex; align-items:center; justify-content:center;">{{ unread_count }}</span>
+                        {% endif %}
+                    </button>
+                    <div id="notifDropdown" style="display:none; position:absolute; right:0; top:40px; width:300px; background:#fff; border-radius:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.1); border:1px solid #e2e8f0; z-index:1000;">
+                        <div style="padding:15px; border-bottom:1px solid #e2e8f0; font-weight:600; display:flex; justify-content:space-between; align-items:center;">
+                            Notifications
+                        </div>
+                        <div style="max-height:300px; overflow-y:auto;">
+                            {% for n in notifications %}
+                            <div style="padding:15px; border-bottom:1px solid #f1f5f9; display:flex; gap:10px; align-items:start; background: #fff;">
+                                <div style="color:var(--danger); margin-top:3px;"><i class="fas fa-exclamation-circle"></i></div>
+                                <div style="flex:1;">
+                                    <p style="margin:0; font-size:0.9rem; color:#334155;">{{ n.message }}</p>
+                                    <small style="color:#94a3b8; font-size: 0.75rem;">{{ n.created_at }}</small>
+                                </div>
+                                <form method="POST" action="{{ url_for('read_notification', n_id=n.id) }}">
+                                    <button type="submit" title="Mark as read" style="background:none; border:none; color:#cbd5e1; cursor:pointer;"><i class="fas fa-check"></i></button>
+                                </form>
+                            </div>
+                            {% else %}
+                            <div style="padding:20px; text-align:center; color:#94a3b8; font-size:0.9rem;">No new notifications.</div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="badge-role {{ session.role }}">{{ session.role | capitalize }}</div>
+            </div>
+        </header>
+
+        <div class="content-area">
+            {% set messages = get_flashed_messages() %}
+            {% if messages and messages.length %}
+            <div class="alerts-wrapper">
+                {% for msg in messages %}
+                <div class="alert alert-{{ msg.category }}">
+                    <i class="fas {% if msg.category == 'success' %}fa-check-circle{% elif msg.category == 'danger' %}fa-exclamation-circle{% elif msg.category == 'warning' %}fa-exclamation-triangle{% else %}fa-info-circle{% endif %}"></i>
+                    {{ msg.message }}
+                    <button class="alert-close" onclick="this.parentElement.remove()"><i class="fas fa-times"></i></button>
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            {% block content %}{% endblock %}
+        </div>
+    </main>
+    {% else %}
+    {% block auth_content %}{% endblock %}
+    {% endif %}
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const notifToggle = document.getElementById('notifToggle');
+            const notifDropdown = document.getElementById('notifDropdown');
+            if (notifToggle && notifDropdown) {
+                notifToggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    notifDropdown.style.display = notifDropdown.style.display === 'none' ? 'block' : 'none';
+                });
+                document.addEventListener('click', function(e) {
+                    if (!notifToggle.contains(e.target) && !notifDropdown.contains(e.target)) {
+                        notifDropdown.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+    {% block extra_scripts %}{% endblock %}
+</body>
+</html>

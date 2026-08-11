@@ -1,0 +1,156 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard - Library MS{% endblock %}
+{% block page_title %}<i class="fas fa-home"></i> Dashboard{% endblock %}
+
+{% block content %}
+<!-- Stats Cards -->
+<div class="stats-grid">
+    <div class="stat-card books">
+        <div class="stat-icon"><i class="fas fa-book"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_books }}</h3>
+            <p>Total Books</p>
+        </div>
+        <div class="stat-bg"><i class="fas fa-book"></i></div>
+    </div>
+    {% if session.role == 'admin' %}
+    <div class="stat-card members">
+        <div class="stat-icon"><i class="fas fa-users"></i></div>
+        <div class="stat-info">
+            <h3>{{ total_members }}</h3>
+            <p>Members</p>
+        </div>
+        <div class="stat-bg"><i class="fas fa-users"></i></div>
+    </div>
+    {% endif %}
+    <div class="stat-card issued">
+        <div class="stat-icon"><i class="fas fa-exchange-alt"></i></div>
+        <div class="stat-info">
+            <h3>{{ active_issues }}</h3>
+            <p>Books Issued</p>
+        </div>
+        <div class="stat-bg"><i class="fas fa-exchange-alt"></i></div>
+    </div>
+    <div class="stat-card overdue">
+        <div class="stat-icon"><i class="fas fa-exclamation-triangle"></i></div>
+        <div class="stat-info">
+            <h3>{{ overdue }}</h3>
+            <p>Overdue</p>
+        </div>
+        <div class="stat-bg"><i class="fas fa-exclamation-triangle"></i></div>
+    </div>
+    <div class="stat-card fines">
+        <div class="stat-icon"><i class="fas fa-rupee-sign"></i></div>
+        <div class="stat-info">
+            <h3>₹{{ total_fines }}</h3>
+            <p>Total Fines</p>
+        </div>
+        <div class="stat-bg"><i class="fas fa-rupee-sign"></i></div>
+    </div>
+</div>
+
+<!-- Quick Actions (Admin only) -->
+{% if session.role == 'admin' %}
+<div class="section-header">
+    <h2><i class="fas fa-bolt"></i> Quick Actions</h2>
+</div>
+<div class="quick-actions">
+    <a href="{{ url_for('add_book') }}" class="quick-btn">
+        <i class="fas fa-plus-circle"></i>
+        <span>Add Book</span>
+    </a>
+    <a href="{{ url_for('add_member') }}" class="quick-btn">
+        <i class="fas fa-user-plus"></i>
+        <span>Add Member</span>
+    </a>
+    <a href="{{ url_for('transactions') }}" class="quick-btn">
+        <i class="fas fa-hand-holding-open"></i>
+        <span>Issue Book</span>
+    </a>
+    <a href="{{ url_for('reports') }}" class="quick-btn">
+        <i class="fas fa-file-alt"></i>
+        <span>Reports</span>
+    </a>
+</div>
+{% endif %}
+
+<!-- Recommended Books (Member only) -->
+{% if session.role == 'member' and recommended_books %}
+<div class="section-header" style="margin-top: 30px;">
+    <h2><i class="fas fa-star" style="color: #fbbf24;"></i> Recommended for You</h2>
+</div>
+<div class="books-grid" style="margin-bottom: 30px;">
+    {% for book in recommended_books %}
+    <div class="book-card">
+        <div class="book-cover" {% if book.book_cover %}style="padding:0; background:none;"{% endif %}>
+            {% if book.book_cover %}
+            <img src="{{ url_for('static', filename='uploads/covers/' + book.book_cover) }}" alt="Cover" style="width: 100%; height: 180px; object-fit: cover; border-radius: 6px 6px 0 0; display: block;">
+            {% else %}
+            <i class="fas fa-book-open"></i>
+            {% endif %}
+            <span class="book-cat-badge" style="z-index: 2;">{{ book.category or 'General' }}</span>
+        </div>
+        <div class="book-info">
+            <h3 class="book-title" title="{{ book.title }}">{{ book.title }}</h3>
+            <p class="book-author"><i class="fas fa-user-pen"></i> {{ book.author }}</p>
+            <div class="book-availability">
+                <span class="avail-badge avail">
+                    <i class="fas fa-check-circle"></i> Available
+                </span>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+</div>
+{% endif %}
+
+<!-- Recent Transactions -->
+<div class="section-header">
+    <h2><i class="fas fa-history"></i> Recent Transactions</h2>
+    <a href="{{ url_for('transactions') }}" class="btn-view-all">View All <i class="fas fa-arrow-right"></i></a>
+</div>
+<div class="table-card">
+    <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>#</th>
+                    <th>Book</th>
+                    <th>Member</th>
+                    <th>Issue Date</th>
+                    <th>Due Date</th>
+                    <th>Status</th>
+                    <th>Fine</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for t in recent_transactions %}
+                <tr>
+                    <td>{{ t.id }}</td>
+                    <td><span class="book-title">{{ t.book_title }}</span></td>
+                    <td>{{ t.member_name }}</td>
+                    <td>{{ t.issue_date }}</td>
+                    <td>{{ t.due_date }}</td>
+                    <td>
+                        <span class="badge badge-{{ 'success' if t.status == 'returned' else ('danger' if t.due_date < today else 'warning') }}">
+                            {% if t.status == 'returned' %}Returned
+                            {% elif t.due_date < today %}Overdue
+                            {% else %}Issued{% endif %}
+                        </span>
+                    </td>
+                    <td>{% if t.fine > 0 %}<span class="fine-amt">₹{{ '%.2f'|format(t.fine) }}</span>{% else %}-{% endif %}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="7" class="empty-row">No transactions yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+    const today = "{{ today if today is defined else '' }}";
+</script>
+{% endblock %}
